@@ -36,6 +36,7 @@ import {
   validate as layerValidate,
   layersParse12,
   adjustEndDates,
+  adjustActiveDateRanges,
   adjustStartDates,
   mockFutureTimeLayerOptions,
 } from './modules/layers/util';
@@ -187,6 +188,10 @@ window.onload = () => {
       const legacyState = parse(parameters, config, errors);
       layerValidate(errors, config);
       adjustStartDates(config.layers);
+
+      // handle extending active layer date ranges
+      adjustActiveDateRanges(config.layers, pageLoadTime);
+
       // handle add mock future time to provided layer id
       if (parameters.mockFutureLayer) {
         mockFutureTimeLayerOptions(config.layers, parameters.mockFutureLayer);

@@ -1,6 +1,6 @@
 import { assign } from 'lodash';
 import {
-  datesinDateRanges,
+  datesInDateRanges,
   serializeLayers,
   layersParse12,
   removeLayer,
@@ -115,7 +115,7 @@ test('toggleVisibility util function', () => {
   expect(newLayers[1].visible).toBe(true);
 });
 
-// Permalionk 1.0
+// Permalink 1.0
 describe('permalink 1.0', () => {
   beforeEach(() => {
     defaultStateFromLocation = {
@@ -144,7 +144,7 @@ describe('permalink 1.0', () => {
   });
 });
 
-// Permalionk 1.1
+// Permalink 1.1
 describe('permalink 1.1', () => {
   beforeEach(() => {
     defaultStateFromLocation = {
@@ -263,7 +263,7 @@ describe('permalink 1.1', () => {
       config,
     );
     const activeLayers = stateFromLocation.layers.active.layers;
-    const dates = datesinDateRanges(activeLayers[0], new Date('2020-01-01'));
+    const dates = datesInDateRanges(activeLayers[0], new Date('2020-01-01'));
     expect(dates.length).toBe(3);
   });
   test('test only next date returned (out of range past)', () => {
@@ -278,7 +278,7 @@ describe('permalink 1.1', () => {
       config,
     );
     const activeLayers = stateFromLocation.layers.active.layers;
-    const dates = datesinDateRanges(activeLayers[0], new Date('1990-01-01'));
+    const dates = datesInDateRanges(activeLayers[0], new Date('1990-01-01'));
     expect(dates.length).toBe(1);
   });
   test('test no dates returned (out of range future)', () => {
@@ -293,7 +293,7 @@ describe('permalink 1.1', () => {
       config,
     );
     const activeLayers = stateFromLocation.layers.active.layers;
-    const dates = datesinDateRanges(activeLayers[0], new Date('2030-01-01'));
+    const dates = datesInDateRanges(activeLayers[0], new Date('2030-01-01'));
     expect(dates.length).toBe(0);
   });
   test('test date range returned from given start/end date range for layer coverage panel', () => {
@@ -308,7 +308,7 @@ describe('permalink 1.1', () => {
       config,
     );
     const activeLayers = stateFromLocation.layers.active.layers;
-    const dates = datesinDateRanges(activeLayers[0], new Date('2018-01-01'), new Date('2017-12-01'), new Date('2018-02-01'), new Date('2020-01-01'));
+    const dates = datesInDateRanges(activeLayers[0], new Date('2018-01-01'), new Date('2017-12-01'), new Date('2018-02-01'), new Date('2020-01-01'));
     const isFirstDateEqual = dates[0].toISOString() === '2017-12-01T00:00:00.000Z';
     const isLastDateEqual = dates[dates.length - 1].toISOString() === '2018-01-31T00:00:00.000Z';
     expect(dates.length).toBe(62);

@@ -65,7 +65,7 @@ export function nearestInterval(def, date) {
    * @param  {object} def       A layer definition
    * @param  {object} date      A date to compare against the array of dates
    * @param  {array} dateArray  An array of dates
-   * @return {object}           The date object with normalized timeszone.
+   * @return {object}           The date object with normalized timezone.
    */
 export function prevDateInDateRange(def, date, dateArray) {
   const closestAvailableDates = [];
@@ -635,7 +635,7 @@ const getSubdailyDateRange = ({
 /**
    * Return an array of dates based on the dateRange the current date falls in.
    *
-   * @method datesinDateRanges
+   * @method datesInDateRanges
    * @param  {Object} def            A layer object
    * @param  {Object} date           A date object for currently selected date
    * @param  {Object} startDateLimit A date object used as start date of timeline range for available data
@@ -643,15 +643,16 @@ const getSubdailyDateRange = ({
    * @param  {Object} appNow         A date object of appNow (current date or set explicitly)
    * @return {Array}                 An array of dates with normalized timezones
    */
-export function datesinDateRanges(def, date, startDateLimit, endDateLimit, appNow) {
+export function datesInDateRanges(def, date, startDateLimit, endDateLimit, appNow) {
   const {
     dateRanges,
     futureTime,
     period,
     inactive,
   } = def;
-  const rangeLimitsProvided = !!(startDateLimit && endDateLimit);
   let dateArray = [];
+  if (!dateRanges) { return dateArray; }
+  const rangeLimitsProvided = !!(startDateLimit && endDateLimit);
   let currentDate = new Date(date);
 
   let inputStartDate;
@@ -665,8 +666,7 @@ export function datesinDateRanges(def, date, startDateLimit, endDateLimit, appNo
     inputStartDateTime = inputStartDate.getTime();
     inputEndDateTime = inputEndDate.getTime();
   } else {
-    singleDateRangeAndInterval = dateRanges
-    && dateRanges.length === 1
+    singleDateRangeAndInterval = dateRanges.length === 1
     && dateRanges[0].dateInterval === '1';
   }
 
@@ -1403,6 +1403,90 @@ export function adjustStartDates(layers) {
   };
 
   return Object.values(layers).forEach(applyDateAdjustment);
+}
+
+/**
+ * For active, multi-interval layers with on going coverage,
+ * date ranges are modified and added for layer config
+ *
+ * @method adjustActiveDateRanges
+ * @param  {Array} layers array
+ * @param  {Object} appNow - pageLoadTime date
+ * @returns {Array} array of layers
+ */
+export function adjustActiveDateRanges(layers, appNow) {
+  // active layers that can't be future predicted reliably due to sparse coverage
+  const ignoredLayers = {
+    AMSRU2_Snow_Water_Equivalent_5Day: true,
+  };
+  const appNowYear = appNow.getUTCFullYear();
+  const applyDateRangeAdjustment = (layer) => {
+    const { dateRanges } = layer;
+    const { inactive, id, period } = layer;
+    if (inactive || ignoredLayers[id] || !dateRanges || period === 'subdaily') {
+      return;
+    }
+
+    const dateRangesModified = [...dateRanges];
+    for (let i = 0; i < dateRangesModified.length; i += 1) {
+      const dateRange = dateRangesModified[i];
+      const {
+        endDate,
+        startDate,
+        dateInterval,
+      } = dateRange;
+
+      const dateIntervalNum = Number(dateInterval);
+      if (i === dateRangesModified.length - 1 && dateIntervalNum > 1) {
+        // create/add dynamic dates to iterated dateRange
+        const start = new Date(startDate);
+        const startDateYear = start.getUTCFullYear();
+
+        if (startDateYear < appNowYear) {
+          // let dynamicStartDate = new Date(startDate);
+          const dynamicStartYear = start.getUTCFullYear() + 1;
+          const dynamicStartDate = new Date(start.setUTCFullYear(dynamicStartYear));
+
+          const end = new Date(endDate);
+          const endDateYear = end.getUTCFullYear();
+          // let dynamicEndDate = new Date(endDate);
+          const dynamicEndYear = end.getUTCFullYear() + 1;
+          let dynamicEndDate = new Date(end.setUTCFullYear(dynamicEndYear));
+
+          // don't extend endDate past appNow
+          dynamicEndDate = dynamicEndDate < appNow
+            ? dynamicEndDate
+            : appNow;
+
+          // extend endDate till end of year if before appNow year
+          // ex: app build date 11/2020 and it's 04/2021 now, this will extend to end of 12/2020
+          if (endDateYear < appNowYear) {
+            let endOfYearDate = new Date('2021-12-31T00:00:00.000Z');
+            endOfYearDate = new Date(endOfYearDate.setUTCFullYear(endDateYear));
+            const modifiedDateRange = {
+              startDate,
+              endDate: util.toISOStringSeconds(endOfYearDate),
+              dateInterval,
+            };
+            dateRangesModified.splice(i, 1, modifiedDateRange);
+          }
+
+          // add date range to modified layer dateRanges
+          if (dynamicStartDate < appNow) {
+            const dynamicDateRange = {
+              startDate: util.toISOStringSeconds(dynamicStartDate),
+              endDate: util.toISOStringSeconds(dynamicEndDate),
+              dateInterval,
+            };
+            dateRangesModified.push(dynamicDateRange);
+          }
+        }
+      }
+    }
+    layer.dateRanges = dateRangesModified;
+  };
+
+  return Object.values(layers).forEach(applyDateRangeAdjustment);
 }
 
 /**

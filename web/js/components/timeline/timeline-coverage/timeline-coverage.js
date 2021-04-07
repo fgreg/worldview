@@ -317,14 +317,14 @@ class TimelineLayerCoveragePanel extends Component {
 
     // handle conditional container styling
     const maxHeightScrollBar = '203px';
-    const layerListItemHeigthConstant = emptyLayers
+    const layerListItemHeightConstant = emptyLayers
       ? 41
       : layers.length * 41;
 
-    const layerCoveragePanelHandleTopOffset = `${Math.max(-54 - layerListItemHeigthConstant, -259)}px`;
+    const layerCoveragePanelHandleTopOffset = `${Math.max(-54 - layerListItemHeightConstant, -259)}px`;
 
     const mainContainerWidth = `${axisWidth + 1}px`;
-    const mainContainerHeight = `${Math.min(35 + layerListItemHeigthConstant, 240)}px`;
+    const mainContainerHeight = `${Math.min(35 + layerListItemHeightConstant, 240)}px`;
     const mainContainerLeftOffset = `${parentOffset - 10}px`;
 
     const isPanelOpenClassName = `timeline-layer-coverage-${isTimelineLayerCoveragePanelOpen ? 'open' : 'closed'}`;
