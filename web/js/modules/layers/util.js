@@ -1,10 +1,7 @@
 import {
   get as lodashGet,
-  cloneDeep as lodashCloneDeep,
   eachRight as lodashEachRight,
   isUndefined as lodashIsUndefined,
-  remove as lodashRemove,
-  findIndex as lodashFindIndex,
   each as lodashEach,
   isNaN as lodashIsNaN,
   startCase as lodashStartCase,
@@ -858,28 +855,6 @@ export function serializeGroupOverlays (groupOverlays, state, activeString) {
   return groupOverlays;
 }
 
-export function toggleVisibility(id, layers) {
-  const index = lodashFindIndex(layers, {
-    id,
-  });
-  if (index === -1) {
-    throw new Error(`Invalid layer ID: ${id}`);
-  }
-  const visibility = !layers[index].visible;
-
-  return update(layers, { [index]: { visible: { $set: visibility } } });
-}
-
-export function removeLayer(id, layers) {
-  const index = lodashFindIndex(layers, {
-    id,
-  });
-  if (index === -1) {
-    throw new Error(`Invalid layer ID: ${id}`);
-  }
-  return update(layers, { $splice: [[index, 1]] });
-}
-
 // this function takes an array of date ranges in this format:
 // [{ layer.period, dateRanges.startDate: Date, dateRanges.endDate: Date, dateRanges.dateInterval: Number}]
 // the array is first sorted, and then checked for any overlap
@@ -1170,37 +1145,6 @@ const createLayerArrayFromState = function(state, config) {
   });
   return layerArray;
 };
-
-export function validate(errors, config) {
-  const error = function(layerId, cause) {
-    errors.push({
-      message: `Invalid layer: ${layerId}`,
-      cause,
-      layerRemoved: true,
-    });
-    delete config.layers[layerId];
-    lodashRemove(config.layerOrder.baselayers, (e) => e === layerId);
-    lodashRemove(config.layerOrder.overlays, (e) => e === layerId);
-  };
-
-  const layers = lodashCloneDeep(config.layers);
-  lodashEach(layers, (layer) => {
-    if (!layer.group) {
-      error(layer.id, 'No group defined');
-      return;
-    }
-    if (!layer.projections) {
-      error(layer.id, 'No projections defined');
-    }
-  });
-
-  const orders = lodashCloneDeep(config.layerOrder);
-  lodashEach(orders, (layerId) => {
-    if (!config.layers[layerId]) {
-      error(layerId, 'No configuration');
-    }
-  });
-}
 
 export function mapLocationToLayerState(
   parameters,

@@ -3,8 +3,6 @@ import {
   datesInDateRanges,
   serializeLayers,
   layersParse12,
-  removeLayer,
-  toggleVisibility,
   mapLocationToLayerState,
   isVectorLayerClickable,
   hasNonClickableVectorLayer,
@@ -98,21 +96,6 @@ test('serialize layers and palettes', () => {
   terraAodLayer.opacity = [0.54];
   const layerStr = serializeLayers([terraAodLayer], state, 'active')[0];
   expect(layerStr).toBe('terra-aod(hidden,opacity=0.54)');
-});
-
-test('removeLayer util function', () => {
-  const layers = [config.layers['terra-cr'], config.layers['terra-aod']];
-  const newLayers = removeLayer('terra-cr', layers);
-  expect(newLayers.length).toBe(1);
-  expect(newLayers[0].id).toBe('terra-aod');
-});
-
-test('toggleVisibility util function', () => {
-  const terraCrLayer = config.layers['terra-cr'];
-  terraCrLayer.visible = false;
-  const layers = [config.layers['terra-aod'], terraCrLayer];
-  const newLayers = toggleVisibility('terra-cr', layers);
-  expect(newLayers[1].visible).toBe(true);
 });
 
 // Permalink 1.0

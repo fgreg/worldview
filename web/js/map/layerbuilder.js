@@ -35,12 +35,8 @@ import {
   nearestInterval,
 } from '../modules/layers/util';
 
-export default function mapLayerBuilder(models, config, cache, ui, store) {
+export default function mapLayerBuilder(config, cache, store) {
   const self = {};
-
-  self.init = function() {
-    self.extentLayers = [];
-  };
 
   /**
    * Return a layer, or layergroup, created with the supplied function
@@ -70,7 +66,7 @@ export default function mapLayerBuilder(models, config, cache, ui, store) {
    * For subdaily layers, if the layer date is within 30 minutes of current
    * time, set expiration to ten minutes from now
    */
-  const getCacheOptions = (period, date, state) => {
+  const getCacheOptions = (period, date) => {
     const tenMin = 10 * 60000;
     const thirtyMin = 30 * 60000;
     const now = Date.now();
@@ -108,7 +104,7 @@ export default function mapLayerBuilder(models, config, cache, ui, store) {
     if (!layer) {
       // layer is not in the cache
       if (!date) date = options.date || getSelectedDate(state);
-      const cacheOptions = getCacheOptions(def.period, date, state);
+      const cacheOptions = getCacheOptions(def.period, date);
       const attributes = {
         id: def.id,
         key,
@@ -597,6 +593,5 @@ export default function mapLayerBuilder(models, config, cache, ui, store) {
     return layer;
   };
 
-  self.init();
   return self;
 }

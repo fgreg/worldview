@@ -91,12 +91,6 @@ export default (function(self) {
     }
     return result;
   };
-  self.elapsed = function(message, startTime, parameters) {
-    if (parameters && !parameters.elapsed) return;
-    const t = Date.now() - startTime;
-    console.log(t, message);
-    return t;
-  };
 
   /**
    * Converts an object to a query string. For example, the following
@@ -752,13 +746,9 @@ export default (function(self) {
 
   self.errorReport = function(errors) {
     // eslint-disable-next-line no-unused-vars
-    let layersRemoved = 0;
     lodashEach(errors, (error) => {
       const cause = error.cause ? `: ${error.cause}` : '';
       self.warn(error.message + cause);
-      if (error.layerRemoved) {
-        layersRemoved += 1;
-      }
     });
   };
 
