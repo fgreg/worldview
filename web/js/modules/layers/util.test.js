@@ -388,7 +388,7 @@ describe('Vector layers', () => {
     expect(false1).toBe(false);
     expect(true1).toBe(true);
   });
-  test('  hasVectorLayers func', () => {
+  test('hasVectorLayers func', () => {
     const false1 = hasVectorLayers([{ type: 'wms', visible: true }], 0.1);
     const false2 = hasVectorLayers([{ type: 'vector', visible: false }], 0.1);
     const true1 = hasVectorLayers(layers);
