@@ -1,5 +1,6 @@
 import { assign } from 'lodash';
 import {
+  adjustActiveDateRanges,
   datesInDateRanges,
   serializeLayers,
   layersParse12,
@@ -234,6 +235,37 @@ describe('permalink 1.1', () => {
     expect(activeLayers[0].id).toBe('terra-cr');
     expect(activeLayers[0].visible).toBeFalsy();
   });
+});
+
+// Date range building
+describe('Date range building', () => {
+  beforeEach(() => {
+    defaultStateFromLocation = {
+      layers: {
+        active: {
+          layers: [],
+        },
+      },
+    };
+  });
+
+  test('test active multi-day layers are extending beyond known GC end date using adjustActiveDateRanges', () => {
+    const parameters = {
+      products: 'MODIS_Combined_L4_LAI_4Day',
+    };
+
+    const stateFromLocation = mapLocationToLayerState(
+      parameters,
+      defaultStateFromLocation,
+      globalState,
+      config,
+    );
+    const activeLayers = stateFromLocation.layers.active.layers;
+    adjustActiveDateRanges(activeLayers, new Date('2021-04-30T16:00:00Z'));
+    const { dateRanges } = activeLayers[0];
+    expect(dateRanges.length).toBe(4);
+    expect(dateRanges[3].endDate).toBe('2021-04-30T16:00:00Z');
+  });
   test('test limited date range returned for layer with single date range and interval', () => {
     const parameters = {
       products: 'terra-cr',
@@ -299,6 +331,7 @@ describe('permalink 1.1', () => {
     expect(isLastDateEqual).toBeTruthy();
   });
 });
+
 describe('Vector layers', () => {
   const breakPointLayer = {
     projections: {

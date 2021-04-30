@@ -1367,7 +1367,11 @@ export function adjustActiveDateRanges(layers, appNow) {
   const applyDateRangeAdjustment = (layer) => {
     const { dateRanges } = layer;
     const { inactive, id, period } = layer;
-    if (inactive || ignoredLayers[id] || !dateRanges || period === 'subdaily') {
+    const failConditions = inactive
+      || ignoredLayers[id]
+      || !dateRanges
+      || period === 'subdaily';
+    if (failConditions) {
       return;
     }
 
